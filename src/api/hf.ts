@@ -25,7 +25,7 @@ export async function validate_token(token: string): Promise<ValidationResult> {
 			},
 		});
 		if (response.status === 200) {
-			const data: ValidationResult = response.json;
+			const data = response.json as unknown as ValidationResult;
 
 			return {
 				isValid: true,

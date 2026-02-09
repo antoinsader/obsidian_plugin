@@ -1,6 +1,10 @@
 import LlmSummaryPlugin from "main";
 import { App, Modal, requestUrl, Setting } from "obsidian";
 
+type FalconSummaryResponse = Array<{
+	summary_text: string;
+  }>;
+
 export class FalconSummaryModel extends Modal {
 	private text: string;
 	private model_id: string;
@@ -36,7 +40,7 @@ export class FalconSummaryModel extends Modal {
 		}
 		const loadingEl = contentEl.createEl("p", { text: "Loading summary…", cls: "falcon-loading" });
 
-		this.summarize_falcon(contentEl, loadingEl);
+		void  this.summarize_falcon(contentEl, loadingEl);
 	}
 
 	private async summarize_falcon(
@@ -61,21 +65,18 @@ export class FalconSummaryModel extends Modal {
 					},
 				}),
 			});
-
-			const result = response.json;
+			const result = response.json as unknown as FalconSummaryResponse;
 
 			if (response.status === 503) {
-				const waitTime : number = result.estimated_time || 20;
 				console.error(
-					`Model is sleeping. It will be ready in ${Math.round(
-						waitTime
-					)} seconds.`
+					`Model is sleeping. please try again later, result: ${JSON.stringify(result)}`
 				);
 				return;
 			}
 
 			if (response.status !== 200) {
 				console.error("summarize_falcon Error: ", result);
+				return;
 			}
 
 			containerEl.createEl("h3", { text: "Your summary" });
